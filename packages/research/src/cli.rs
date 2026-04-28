@@ -165,6 +165,13 @@ pub enum Commands {
         /// to report length.
         #[arg(long)]
         bilingual: bool,
+        /// Also convert the rendered report.html to report.pdf using
+        /// isolated local Chromium.
+        #[arg(long)]
+        pdf: bool,
+        /// Explicit PDF output path. Implies --pdf.
+        #[arg(long = "pdf-output")]
+        pdf_output: Option<String>,
     },
     /// Run the completion protocol: coverage -> synthesize -> audit.
     Finish {
@@ -458,7 +465,16 @@ fn dispatch(cmd: Commands) -> Envelope {
             no_render,
             open,
             bilingual,
-        } => commands::synthesize::run(slug.as_deref(), no_render, open, bilingual),
+            pdf,
+            pdf_output,
+        } => commands::synthesize::run(
+            slug.as_deref(),
+            no_render,
+            open,
+            bilingual,
+            pdf || pdf_output.is_some(),
+            pdf_output.as_deref(),
+        ),
         Commands::Finish {
             slug,
             open,
